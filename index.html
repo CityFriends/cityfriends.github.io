@@ -1,24 +1,65 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ProposalOps with AI Backend</title>
+  <title>ProposalOps AI Assistant</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; max-width: 700px; margin: auto; }
-    textarea { width: 100%; height: 150px; margin-top: 1rem; padding: 1rem; font-size: 1rem; }
-    button { padding: 10px 20px; font-size: 1rem; margin-top: 1rem; }
-    .response { margin-top: 2rem; padding: 1rem; background: #f0f0f0; border-left: 5px solid #667eea; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6fa;
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+      color: #333;
+    }
+    h1 {
+      color: #3f51b5;
+      margin-bottom: 1rem;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: white;
+      background-color: #3f51b5;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #303f9f;
+    }
+    .response {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #ffffff;
+      border-left: 5px solid #3f51b5;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      white-space: pre-wrap;
+    }
+    label {
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <h1>🤖 ProposalOps AI Assistant</h1>
-  <p>Enter proposal text and click the button to get AI assistance.</p>
+  <p>Paste your proposal content or RFP text below and click the button to get help from GPT-4.</p>
 
-  <textarea id="proposalText" placeholder="Paste your RFP section or proposal draft here..."></textarea>
-  <br/>
+  <label for="proposalText">Proposal Section or RFP Excerpt:</label>
+  <textarea id="proposalText" placeholder="e.g., Describe your technical approach to fulfilling the contract requirements..."></textarea>
   <button onclick="getHelp()">🚀 Get AI Help</button>
 
   <div class="response" id="aiResponse">AI response will appear here...</div>
@@ -26,15 +67,22 @@
   <script>
     async function getHelp() {
       const text = document.getElementById('proposalText').value;
+      const responseBox = document.getElementById('aiResponse');
+      responseBox.innerText = "Thinking... 🤔";
 
-      const response = await fetch('https://proposalops-backend.cityfriends.repl.co/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text, type: 'compliance' })
-      });
+      try {
+        const response = await fetch('https://proposalops-backend-admin3346.replit.app/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text, type: 'compliance' })
+        });
 
-      const data = await response.json();
-      document.getElementById('aiResponse').innerText = data.result || 'No response from AI.';
+        const data = await response.json();
+        responseBox.innerText = data.result || 'No result from AI.';
+      } catch (error) {
+        console.error(error);
+        responseBox.innerText = '❌ Error contacting AI backend.';
+      }
     }
   </script>
 </body>
