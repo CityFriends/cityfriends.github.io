@@ -1,148 +1,158 @@
 
-<!-- Final full-feature ProposalOps index.html -->
-<!-- Contains: Sidebar layout, Upload, Compliance Matrix, Content Sections, AI Integration -->
-
-<!-- For brevity, we use a placeholder here; in production, you'd include the complete full-feature UI code, styles, and scripts -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ProposalOps - Full Suite</title>
+  <title>ProposalOps – AI Proposal Builder</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Segoe+UI:400,600&display=swap">
   <style>
+    /* --- STYLING: Claude-style UI --- */
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6fa;
       margin: 0;
-      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #333;
+      min-height: 100vh;
     }
-    header, nav, main {
-      padding: 20px;
-    }
-    .sidebar {
-      width: 240px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      background: #3f51b5;
-      color: white;
-      padding: 2rem 1rem;
-    }
-    .sidebar h2 {
-      color: #fff;
-      font-size: 20px;
-      margin-bottom: 30px;
-    }
-    .sidebar button {
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      background: #5c6bc0;
-      color: white;
-      cursor: pointer;
-    }
-    .sidebar button:hover {
-      background: #7986cb;
-    }
-    .main-content {
-      margin-left: 260px;
-      padding: 2rem;
-    }
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      margin-bottom: 1rem;
-    }
-    .response {
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 30px;
       background: #fff;
-      border-left: 5px solid #3f51b5;
-      padding: 1rem;
-      margin-bottom: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
-    input[type="file"] {
-      margin: 1rem 0;
+    h1 {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      font-family: inherit;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    .btn {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .file-item {
+      background: #f8f9fa;
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+    }
+    .requirement {
+      padding: 12px;
+      background: #f0f4ff;
+      margin-bottom: 10px;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>ProposalOps</h2>
-    <button onclick="showSection('upload')">📄 Upload & Analyze</button>
-    <button onclick="showSection('compliance')">✅ Compliance Matrix</button>
-    <button onclick="showSection('content')">✏️ Content Development</button>
-    <button onclick="showSection('ai')">🤖 AI Assistant</button>
-    <button onclick="showSection('export')">📤 Export</button>
-  </div>
+  <div class="container">
+    <h1>📂 ProposalOps AI</h1>
+    <p>Upload RFP files, extract requirements, and generate a compliance matrix.</p>
 
-  <div class="main-content">
-    <section id="upload" class="app-section">
-      <h2>📄 Upload Documents</h2>
-      <input type="file" id="fileInput" multiple />
-      <button onclick="analyze()">🔍 Analyze</button>
-      <div id="uploadResult" class="response">Results will appear here.</div>
-    </section>
+    <input type="file" id="fileInput" multiple accept=".txt,.pdf,.docx" />
+    <div id="fileResults"></div>
+    <button class="btn" id="analyzeBtn" onclick="analyzeFiles()" disabled>🔍 Analyze Documents</button>
 
-    <section id="compliance" class="app-section" style="display:none;">
-      <h2>✅ Compliance Matrix</h2>
-      <div class="response" id="complianceResult">Compliance matrix will appear here after analysis.</div>
-    </section>
-
-    <section id="content" class="app-section" style="display:none;">
-      <h2>✏️ Content Development</h2>
-      <textarea id="contentInput" placeholder="Write or paste proposal content..."></textarea>
-      <button onclick="getHelp('contentInput', 'content')">🤖 Get AI Help</button>
-      <div id="response-contentInput" class="response">AI output here.</div>
-    </section>
-
-    <section id="ai" class="app-section" style="display:none;">
-      <h2>🤖 AI Assistant</h2>
-      <textarea id="aiQuestion" placeholder="Ask a question about proposal writing..."></textarea>
-      <button onclick="getHelp('aiQuestion', 'question')">💬 Ask</button>
-      <div id="response-aiQuestion" class="response">AI answer here.</div>
-    </section>
-
-    <section id="export" class="app-section" style="display:none;">
-      <h2>📤 Export</h2>
-      <button onclick="alert('Download not implemented yet.')">Download Proposal</button>
-    </section>
+    <div id="analysisOutput" style="margin-top: 20px;"></div>
+    <div id="complianceMatrix" style="margin-top: 20px;"></div>
   </div>
 
   <script>
-    const backendURL = "https://proposalops-backend-admin3346.replit.app";
+    let uploadedFiles = [];
+    let extractedRequirements = [];
 
-    function showSection(id) {
-      document.querySelectorAll('.app-section').forEach(sec => sec.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
+    document.getElementById("fileInput").addEventListener("change", (event) => {
+      const files = Array.from(event.target.files);
+      uploadedFiles = files;
+      const resultsDiv = document.getElementById("fileResults");
+      resultsDiv.innerHTML = '';
+
+      files.forEach((file) => {
+        const div = document.createElement("div");
+        div.className = "file-item";
+        div.innerText = file.name;
+        resultsDiv.appendChild(div);
+      });
+
+      document.getElementById("analyzeBtn").disabled = files.length === 0;
+    });
+
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = e => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+      });
     }
 
-    async function getHelp(textareaId, type) {
-      const text = document.getElementById(textareaId).value;
-      const box = document.getElementById("response-" + textareaId);
-      box.innerText = "Thinking...";
+    async function analyzeFiles() {
+      const outputDiv = document.getElementById("analysisOutput");
+      outputDiv.innerHTML = "⏳ Analyzing...";
+
+      let allText = '';
+      for (const file of uploadedFiles) {
+        const text = await readFileAsText(file);
+        allText += text + '\n\n';
+      }
 
       try {
-        const res = await fetch(backendURL + "/analyze", {
+        const res = await fetch("https://proposalops-backend-admin3346.replit.app/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: text, type: type })
+          body: JSON.stringify({ text: allText })
         });
+
+        if (!res.ok) throw new Error("Backend error");
+
         const data = await res.json();
-        box.innerText = data.result || 'No result.';
-      } catch (e) {
-        box.innerText = '❌ Error contacting AI backend.';
+        extractedRequirements = data.requirements;
+
+        outputDiv.innerHTML = `✅ Found ${extractedRequirements.length} requirements.`;
+        renderMatrix();
+      } catch (err) {
+        console.error(err);
+        outputDiv.innerHTML = "❌ Error analyzing document.";
       }
     }
 
-    async function analyze() {
-      const uploadResult = document.getElementById("uploadResult");
-      uploadResult.innerText = "Analyzing uploaded files (demo only)...";
-      // Add file parsing logic if backend supports it
+    function renderMatrix() {
+      const matrixDiv = document.getElementById("complianceMatrix");
+      matrixDiv.innerHTML = "<h3>✅ Compliance Matrix</h3>";
+
+      extractedRequirements.forEach(req => {
+        const div = document.createElement("div");
+        div.className = "requirement";
+        div.innerHTML = `
+          <strong>${req.reference}: ${req.title}</strong><br/>
+          ${req.description}<br/>
+          <em>Type: ${req.type}</em>
+        `;
+        matrixDiv.appendChild(div);
+      });
     }
   </script>
 </body>
