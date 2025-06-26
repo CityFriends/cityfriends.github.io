@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ProposalOps Prototype</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 2rem; }
+    h1, h2 { color: #2c3e50; }
+  </style>
+</head>
+<body>
+  <h1>ProposalOps: Proposal Development Tool</h1>
+  <p><strong>Built from the Claude Artifact</strong></p>
+  <h2>Phase 1: Capture Planning</h2>
+  <ul>
+    <li>Opportunity Summary</li>
+    <li>SWOT Analysis</li>
+    <li>Win Themes</li>
+  </ul>
+  <!-- Add more sections from the Artifact -->
+</body>
+</html>
