@@ -4,155 +4,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ProposalOps – AI Proposal Builder</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Segoe+UI:400,600&display=swap">
+  <title>ProposalOps Upload</title>
   <style>
-    /* --- STYLING: Claude-style UI --- */
     body {
+      font-family: Arial, sans-serif;
+      background: #f6f8fa;
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      padding: 2rem;
       color: #333;
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 30px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
     h1 {
-      background: linear-gradient(45deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-size: 2em;
-      margin-bottom: 10px;
+      color: #4b6cb7;
     }
-    textarea, input[type="text"] {
-      width: 100%;
-      font-family: inherit;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
-    .btn {
-      background: linear-gradient(45deg, #667eea, #764ba2);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 25px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    .btn:hover {
-      opacity: 0.9;
-    }
-    .file-item {
-      background: #f8f9fa;
-      padding: 10px;
-      margin: 10px 0;
-      border-left: 4px solid #667eea;
-      border-radius: 8px;
+    input[type="file"] {
+      margin: 1rem 0;
     }
     .requirement {
-      padding: 12px;
-      background: #f0f4ff;
-      margin-bottom: 10px;
-      border-left: 4px solid #667eea;
-      border-radius: 8px;
+      background: #eef1f5;
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 0.5rem 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📂 ProposalOps AI</h1>
-    <p>Upload RFP files, extract requirements, and generate a compliance matrix.</p>
-
-    <input type="file" id="fileInput" multiple accept=".txt,.pdf,.docx" />
-    <div id="fileResults"></div>
-    <button class="btn" id="analyzeBtn" onclick="analyzeFiles()" disabled>🔍 Analyze Documents</button>
-
-    <div id="analysisOutput" style="margin-top: 20px;"></div>
-    <div id="complianceMatrix" style="margin-top: 20px;"></div>
+    <h1>ProposalOps – Upload RFP Files</h1>
+    <input type="file" id="fileInput" multiple accept=".pdf,.docx,.txt"/>
+    <button onclick="analyzeFiles()">🔍 Analyze</button>
+    <div id="results"></div>
   </div>
 
   <script>
-    let uploadedFiles = [];
-    let extractedRequirements = [];
-
-    document.getElementById("fileInput").addEventListener("change", (event) => {
-      const files = Array.from(event.target.files);
-      uploadedFiles = files;
-      const resultsDiv = document.getElementById("fileResults");
-      resultsDiv.innerHTML = '';
-
-      files.forEach((file) => {
-        const div = document.createElement("div");
-        div.className = "file-item";
-        div.innerText = file.name;
-        resultsDiv.appendChild(div);
-      });
-
-      document.getElementById("analyzeBtn").disabled = files.length === 0;
-    });
-
-    function readFileAsText(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = e => reject(new Error('Failed to read file'));
-        reader.readAsText(file);
-      });
-    }
-
     async function analyzeFiles() {
-      const outputDiv = document.getElementById("analysisOutput");
-      outputDiv.innerHTML = "⏳ Analyzing...";
+      const input = document.getElementById('fileInput');
+      const results = document.getElementById('results');
+      results.innerHTML = "Uploading...";
 
-      let allText = '';
-      for (const file of uploadedFiles) {
-        const text = await readFileAsText(file);
-        allText += text + '\n\n';
+      const formData = new FormData();
+      for (const file of input.files) {
+        formData.append("files", file);
       }
 
       try {
-        const res = await fetch("https://proposalops-backend-admin3346.replit.app/analyze", {
+        const response = await fetch("https://proposalops-backend-admin3346.replit.app/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: allText })
+          body: formData
         });
 
-        if (!res.ok) throw new Error("Backend error");
+        const data = await response.json();
 
-        const data = await res.json();
-        extractedRequirements = data.requirements;
-
-        outputDiv.innerHTML = `✅ Found ${extractedRequirements.length} requirements.`;
-        renderMatrix();
+        if (data.error) {
+          results.innerHTML = `<p style="color:red;">${data.error}</p>`;
+        } else {
+          results.innerHTML = `<h3>✅ Found ${data.requirements.length} Requirements:</h3>`;
+          data.requirements.forEach(req => {
+            results.innerHTML += `
+              <div class="requirement">
+                <strong>${req.title}</strong><br/>
+                <small>${req.reference}</small><br/>
+                <p>${req.description}</p>
+              </div>`;
+          });
+        }
       } catch (err) {
-        console.error(err);
-        outputDiv.innerHTML = "❌ Error analyzing document.";
+        results.innerHTML = `<p style="color:red;">Server error. Try again later.</p>`;
       }
-    }
-
-    function renderMatrix() {
-      const matrixDiv = document.getElementById("complianceMatrix");
-      matrixDiv.innerHTML = "<h3>✅ Compliance Matrix</h3>";
-
-      extractedRequirements.forEach(req => {
-        const div = document.createElement("div");
-        div.className = "requirement";
-        div.innerHTML = `
-          <strong>${req.reference}: ${req.title}</strong><br/>
-          ${req.description}<br/>
-          <em>Type: ${req.type}</em>
-        `;
-        matrixDiv.appendChild(div);
-      });
     }
   </script>
 </body>
